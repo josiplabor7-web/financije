@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Financije — Obrta</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>💰</text></svg>" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'DM Sans',system-ui,sans-serif;background:linear-gradient(180deg,#faf8f5,#f5f0ea);color:#333;min-height:100vh}
+    .app{max-width:600px;margin:0 auto;padding:16px}
+    .header{margin-bottom:20px;border-bottom:2px solid #c9a87c;padding-bottom:16px}
+    .header h1{font-family:'Cormorant Garamond',serif;font-size:28px;color:#2a2420;font-weight:600}
+    .header p{font-size:12px;color:#a09080;letter-spacing:1.5px;margin-top:4px;text-transform:uppercase;font-weight:500}
+    .tabs{display:flex;gap:4px;margin-bottom:20px}
+    .tab{flex:1;padding:10px 4px;border:1px solid #e0d8d0;border-radius:10px;background:#fff;color:#888;cursor:pointer;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;transition:all .2s}
+    .tab.active{background:#2a2420;color:#fff;border-color:#2a2420}
+    .tab:hover:not(.active){border-color:#c9a87c}
+    .card{background:#fff;border-radius:14px;padding:20px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+    .card h2{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:#2a2420;margin-bottom:16px}
+    .label{display:block;font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;margin-top:12px}
+    .label:first-child{margin-top:0}
+    .input{width:100%;padding:10px 12px;border:1px solid #e0d8d0;border-radius:8px;font-size:14px;background:#faf8f5;outline:none;font-family:inherit}
+    .input:focus{border-color:#c9a87c}
+    .iw{position:relative}.iw .eur{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:15px;color:#aaa;font-weight:500;z-index:1}
+    .iw .input{padding-left:28px;font-weight:700;font-size:17px;background:#fff}
+    .obrt-grid{display:grid;gap:10px;margin:12px 0}
+    .obrt-card{padding:14px;border-radius:10px;border:1px solid #eee5dc}
+    .obrt-card.bc{background:linear-gradient(135deg,#faf8f5,#f8f0e8);border-left:4px solid #c9a87c}
+    .obrt-card.fb{background:linear-gradient(135deg,#f5f8fa,#e8f0f8);border-left:4px solid #e85d3a}
+    .obrt-card.crno{background:linear-gradient(135deg,#f5f5f5,#eaeaea);border-left:4px solid #555}
+    .obrt-label{font-size:13px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+    .obrt-label .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+    .total-bar{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding:14px 18px;background:#2a2420;border-radius:10px;color:#fff}
+    .total-bar .tl{font-size:13px}.total-bar .tv{font-size:22px;font-weight:700;font-family:'Cormorant Garamond',serif}
+    .btn{width:100%;padding:13px;background:#c9a87c;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:14px;font-family:'DM Sans',sans-serif;transition:opacity .2s}
+    .btn:hover{opacity:.9}
+    .pill-row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 14px}
+    .pill{padding:7px 12px;border-radius:20px;border:1px solid #ddd;background:#fff;color:#666;font-size:12px;cursor:pointer;font-weight:500;font-family:'DM Sans',sans-serif;transition:all .2s}
+    .pill.bc-a{background:#c9a87c;color:#fff;border-color:#c9a87c}
+    .pill.fb-a{background:#e85d3a;color:#fff;border-color:#e85d3a}
+    .list-item{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #f5f0ea;gap:8px}
+    .list-item .info{flex:1;line-height:1.5}
+    .list-item .date{font-size:13px;color:#999}
+    .list-item .amt{font-weight:700}
+    .amt.green{color:#2d5016}.amt.red{color:#c94c4c}.amt.pink{color:#c97ca8}.amt.orange{color:#e85d3a}.amt.dark{color:#555}
+    .list-item .note{display:block;font-size:12px;color:#bbb;margin-top:2px}
+    .obrt-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px}
+    .obrt-tag.bc{background:rgba(201,168,124,.15);color:#c9a87c}
+    .obrt-tag.fb{background:rgba(232,93,58,.12);color:#e85d3a}
+    .del-btn{width:26px;height:26px;border:none;background:rgba(201,76,76,.08);color:#c94c4c;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+    .stitle{font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;margin-bottom:10px;margin-top:28px}
+    .month-nav{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:20px}
+    .arrow{width:34px;height:34px;border:1px solid #e0d8d0;border-radius:8px;background:#fff;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:#666;font-family:'DM Sans',sans-serif}
+    .mlabel{font-size:20px;font-weight:700;color:#2a2420;min-width:170px;text-align:center}
+    .sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+    .sc{background:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+    .sc .sl{font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+    .sc .sv{font-size:20px;font-weight:700;font-family:'Cormorant Garamond',serif}
+    .sc .sv.big{font-size:24px;font-weight:800}
+    .pi{margin-bottom:12px}.ph{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}.ph .pv{font-weight:600}
+    .pt{height:10px;background:#f0ebe5;border-radius:5px;overflow:hidden;display:flex}
+    .pf{height:100%;transition:width .5s ease}
+    .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#2a2420;color:#fff;padding:8px 20px;border-radius:8px;font-size:14px;z-index:99;box-shadow:0 4px 16px rgba(0,0,0,.2);animation:fi .3s}
+    @keyframes fi{from{opacity:0;transform:translateX(-50%) translateY(-10px)}}
+    .footer{text-align:center;padding:24px 0;font-size:11px;color:#ccc}
+    .view{display:none}.view.active{display:block}
+    .salary-row{display:flex;gap:8px;margin-bottom:8px}
+    .salary-row .input{flex:1}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    @media(max-width:400px){.sg{grid-template-columns:1fr}.two-col{grid-template-columns:1fr}.tab{font-size:11px;padding:8px 2px}}
+  </style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script>
+const OBRTS = [
+  {id:"bc",label:"Beauty Clinic",color:"#c9a87c",icon:"💅"},
+  {id:"fb",label:"Firebody",color:"#e85d3a",icon:"🔥"},
+  {id:"crno",label:"Crno",color:"#555",icon:"💵"},
+];
+const XCATS = [
+  {id:"najam",label:"Najam",icon:"🏠"},
+  {id:"rezije",label:"Režije",icon:"💡"},
+  {id:"materijal",label:"Materijal",icon:"📦"},
+  {id:"marketing",label:"Marketing",icon:"📣"},
+  {id:"oprema",label:"Oprema",icon:"🔧"},
+  {id:"racunovodstvo",label:"Računovodstvo",icon:"📋"},
+  {id:"ostalo",label:"Ostalo",icon:"📌"},
+];
+const MO=["Siječanj","Veljača","Ožujak","Travanj","Svibanj","Lipanj","Srpanj","Kolovoz","Rujan","Listopad","Studeni","Prosinac"];
+const eur=n=>new Intl.NumberFormat("hr-HR",{style:"currency",currency:"EUR"}).format(n);
+const td=()=>new Date().toISOString().split("T")[0];
+const mk=d=>d.substring(0,7);
+const moLabel=m=>MO[parseInt(m.split("-")[1])-1]+" "+m.split("-")[0];
+
+let data={revenue:[],expenses:[],salaries:[]};
+let tab="revenue";
+let selMo=mk(td());
+let xObrt="bc";
+let xCat="najam";
+
+function load(){try{const r=localStorage.getItem("obrt-fin");if(r)data=JSON.parse(r)}catch(e){}}
+function save(){localStorage.setItem("obrt-fin",JSON.stringify(data))}
+function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2000)}
+
+function render(){
+  const app=document.getElementById("app");
+  const me=data.revenue.filter(r=>r.month===selMo);
+  const mx=data.expenses.filter(e=>mk(e.date)===selMo);
+  const ms=data.salaries.filter(s=>s.month===selMo);
+
+  // Totals per obrt
+  const revByObrt={bc:0,fb:0,crno:0};
+  me.forEach(r=>{revByObrt.bc+=r.bc||0;revByObrt.fb+=r.fb||0;revByObrt.crno+=r.crno||0});
+  const totRev=revByObrt.bc+revByObrt.fb+revByObrt.crno;
+
+  const expByObrt={bc:0,fb:0};
+  mx.forEach(e=>{expByObrt[e.obrt]=(expByObrt[e.obrt]||0)+e.amount});
+  const totExp=expByObrt.bc+expByObrt.fb;
+
+  const salByObrt={bc:0,fb:0};
+  ms.forEach(s=>{const t=(s.bruto||0)+(s.bonus||0);salByObrt[s.obrt]=(salByObrt[s.obrt]||0)+t});
+  const totSal=salByObrt.bc+salByObrt.fb;
+
+  const bil=totRev-totExp-totSal;
+  const bilBC=revByObrt.bc-expByObrt.bc-salByObrt.bc;
+  const bilFB=revByObrt.fb-expByObrt.fb-salByObrt.fb;
+
+  app.innerHTML=`
+    <div class="header">
+      <h1>Financije</h1>
+      <p>Beauty Clinic · Firebody · ${new Date().getFullYear()}</p>
+    </div>
+    <div class="tabs">
+      <button class="tab ${tab==='revenue'?'active':''}" onclick="sw('revenue')">💰 Promet</button>
+      <button class="tab ${tab==='expenses'?'active':''}" onclick="sw('expenses')">📤 Rashodi</button>
+      <button class="tab ${tab==='salaries'?'active':''}" onclick="sw('salaries')">👩‍💼 Plaće</button>
+      <button class="tab ${tab==='dashboard'?'active':''}" onclick="sw('dashboard')">📊 Pregled</button>
+    </div>
+
+    <!-- PROMET -->
+    <div class="view ${tab==='revenue'?'active':''}">
+      <div class="card">
+        <h2>Mjesečni promet</h2>
+        <label class="label">Mjesec</label>
+        <input type="month" class="input" id="r-month" value="${mk(td())}" />
+        <div class="obrt-grid">
+          ${OBRTS.map(o=>`
+            <div class="obrt-card ${o.id}">
+              <div class="obrt-label"><span class="dot" style="background:${o.color}"></span>${o.icon} ${o.label}</div>
+              <div class="iw"><span class="eur">€</span><input type="number" min="0" step="0.01" placeholder="0" class="input" id="r-${o.id}" oninput="calcRevTotal()" /></div>
+            </div>
+          `).join("")}
+        </div>
+        <div class="total-bar">
+          <span class="tl">Ukupno</span>
+          <span class="tv" id="r-total">${eur(0)}</span>
+        </div>
+        <button class="btn" onclick="addRevenue()">Spremi promet</button>
+
+        ${data.revenue.length>0?`
+          <div class="stitle">Unosi</div>
+          ${[...data.revenue].reverse().slice(0,10).map(r=>{
+            const t=(r.bc||0)+(r.fb||0)+(r.crno||0);
+            return`<div class="list-item">
+              <div class="info">
+                <span class="date">${moLabel(r.month)}</span>
+                <span class="amt green" style="margin-left:8px">${eur(t)}</span>
+                <div style="margin-top:4px;font-size:12px;color:#888">
+                  💅 ${eur(r.bc||0)} &nbsp; 🔥 ${eur(r.fb||0)} &nbsp; 💵 ${eur(r.crno||0)}
+                </div>
+              </div>
+              <button class="del-btn" onclick="del('revenue',${r.id})">✕</button>
+            </div>`;
+          }).join("")}
+        `:""}
+      </div>
+    </div>
+
+    <!-- RASHODI -->
+    <div class="view ${tab==='expenses'?'active':''}">
+      <div class="card">
+        <h2>Unos rashoda</h2>
+        <label class="label">Datum</label>
+        <input type="date" class="input" id="x-date" value="${td()}" />
+
+        <label class="label">Obrt</label>
+        <div class="pill-row">
+          <button class="pill ${xObrt==='bc'?'bc-a':''}" onclick="setXO('bc')">💅 Beauty Clinic</button>
+          <button class="pill ${xObrt==='fb'?'fb-a':''}" onclick="setXO('fb')">🔥 Firebody</button>
+        </div>
+
+        <label class="label">Kategorija</label>
+        <div class="pill-row">
+          ${XCATS.map(c=>`<button class="pill ${xCat===c.id?(xObrt==='bc'?'bc-a':'fb-a'):''}" onclick="setXC('${c.id}')">${c.icon} ${c.label}</button>`).join("")}
+        </div>
+
+        <label class="label">Iznos</label>
+        <div class="iw"><span class="eur">€</span><input type="number" min="0" step="0.01" placeholder="0" class="input" id="x-amt" /></div>
+
+        <label class="label">Napomena</label>
+        <input type="text" class="input" id="x-note" placeholder="Opis..." />
+        <button class="btn" onclick="addExpense()">Spremi rashod</button>
+
+        ${data.expenses.length>0?`
+          <div class="stitle">Zadnji rashodi</div>
+          ${[...data.expenses].reverse().slice(0,10).map(e=>{
+            const c=XCATS.find(x=>x.id===e.category);
+            return`<div class="list-item">
+              <div class="info">
+                <span>${c?c.icon:""} </span>
+                <span class="date">${new Date(e.date).toLocaleDateString("hr-HR")}</span>
+                <span class="amt red"> -${eur(e.amount)}</span>
+                <span class="obrt-tag ${e.obrt}">${e.obrt==='bc'?'Beauty Clinic':'Firebody'}</span>
+                ${e.note?`<span class="note">${e.note}</span>`:""}
+              </div>
+              <button class="del-btn" onclick="del('expenses',${e.id})">✕</button>
+            </div>`;
+          }).join("")}
+        `:""}
+      </div>
+    </div>
+
+    <!-- PLAĆE -->
+    <div class="view ${tab==='salaries'?'active':''}">
+      <div class="card">
+        <h2>Plaće</h2>
+        <label class="label">Mjesec</label>
+        <input type="month" class="input" id="s-month" value="${mk(td())}" />
+
+        <label class="label">Obrt</label>
+        <div class="pill-row" id="s-obrt-pills">
+          <button class="pill ${xObrt==='bc'?'bc-a':''}" onclick="setXO('bc')"  id="sp-bc">💅 Beauty Clinic</button>
+          <button class="pill ${xObrt==='fb'?'fb-a':''}" onclick="setXO('fb')" id="sp-fb">🔥 Firebody</button>
+        </div>
+
+        <label class="label">Ime zaposlenika</label>
+        <input type="text" class="input" id="s-name" placeholder="Ana, Marija..." />
+
+        <div class="two-col">
+          <div>
+            <label class="label">Bruto plaća</label>
+            <div class="iw"><span class="eur">€</span><input type="number" min="0" step="0.01" placeholder="0" class="input" id="s-bruto" /></div>
+          </div>
+          <div>
+            <label class="label">Bonus</label>
+            <div class="iw"><span class="eur">€</span><input type="number" min="0" step="0.01" placeholder="0" class="input" id="s-bonus" /></div>
+          </div>
+        </div>
+        <button class="btn" onclick="addSalary()">Spremi plaću</button>
+
+        ${data.salaries.length>0?`
+          <div class="stitle">Unesene plaće</div>
+          ${[...data.salaries].reverse().slice(0,10).map(s=>{
+            const t=(s.bruto||0)+(s.bonus||0);
+            return`<div class="list-item">
+              <div class="info">
+                <span class="date">${moLabel(s.month)}</span>
+                <span style="font-weight:600;color:#555;margin:0 6px">${s.name}</span>
+                <span class="amt pink">${eur(t)}</span>
+                <span class="obrt-tag ${s.obrt}">${s.obrt==='bc'?'Beauty Clinic':'Firebody'}</span>
+                <div style="font-size:11px;color:#aaa;margin-top:2px">Bruto: ${eur(s.bruto||0)} + Bonus: ${eur(s.bonus||0)}</div>
+              </div>
+              <button class="del-btn" onclick="del('salaries',${s.id})">✕</button>
+            </div>`;
+          }).join("")}
+        `:""}
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="view ${tab==='dashboard'?'active':''}">
+      <div class="month-nav">
+        <button class="arrow" onclick="chMo(-1)">←</button>
+        <span class="mlabel">${moLabel(selMo)}</span>
+        <button class="arrow" onclick="chMo(1)">→</button>
+      </div>
+
+      <!-- Ukupno -->
+      <div class="sg">
+        <div class="sc" style="border-left:4px solid #2d5016">
+          <div class="sl">Ukupni prihodi</div>
+          <div class="sv" style="color:#2d5016">${eur(totRev)}</div>
+        </div>
+        <div class="sc" style="border-left:4px solid #c94c4c">
+          <div class="sl">Ukupni rashodi</div>
+          <div class="sv" style="color:#c94c4c">${eur(totExp)}</div>
+        </div>
+        <div class="sc" style="border-left:4px solid #c97ca8">
+          <div class="sl">Ukupne plaće</div>
+          <div class="sv" style="color:#c97ca8">${eur(totSal)}</div>
+        </div>
+        <div class="sc" style="border-left:4px solid ${bil>=0?'#2d5016':'#c94c4c'};background:${bil>=0?'#f5fbf0':'#fdf5f5'}">
+          <div class="sl">Bilanca</div>
+          <div class="sv big" style="color:${bil>=0?'#2d5016':'#c94c4c'}">${eur(bil)}</div>
+        </div>
+      </div>
+
+      <!-- Per obrt breakdown -->
+      <div class="card">
+        <h2>Po obrtu</h2>
+
+        <!-- Beauty Clinic -->
+        <div style="padding:14px;border-radius:10px;background:linear-gradient(135deg,#faf8f5,#f8f0e8);border-left:4px solid #c9a87c;margin-bottom:10px">
+          <div style="font-weight:700;font-size:14px;margin-bottom:8px">💅 Beauty Clinic</div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px">
+            <div>Prihod: <strong style="color:#2d5016">${eur(revByObrt.bc)}</strong></div>
+            <div>Rashod: <strong style="color:#c94c4c">${eur(expByObrt.bc)}</strong></div>
+            <div>Plaće: <strong style="color:#c97ca8">${eur(salByObrt.bc)}</strong></div>
+          </div>
+          <div style="margin-top:8px;font-size:16px;font-weight:800;font-family:'Cormorant Garamond',serif;color:${bilBC>=0?'#2d5016':'#c94c4c'}">
+            Bilanca: ${eur(bilBC)}
+          </div>
+        </div>
+
+        <!-- Firebody -->
+        <div style="padding:14px;border-radius:10px;background:linear-gradient(135deg,#f5f8fa,#e8f0f8);border-left:4px solid #e85d3a;margin-bottom:10px">
+          <div style="font-weight:700;font-size:14px;margin-bottom:8px">🔥 Firebody</div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px">
+            <div>Prihod: <strong style="color:#2d5016">${eur(revByObrt.fb)}</strong></div>
+            <div>Rashod: <strong style="color:#c94c4c">${eur(expByObrt.fb)}</strong></div>
+            <div>Plaće: <strong style="color:#c97ca8">${eur(salByObrt.fb)}</strong></div>
+          </div>
+          <div style="margin-top:8px;font-size:16px;font-weight:800;font-family:'Cormorant Garamond',serif;color:${bilFB>=0?'#2d5016':'#c94c4c'}">
+            Bilanca: ${eur(bilFB)}
+          </div>
+        </div>
+
+        <!-- Crno -->
+        <div style="padding:14px;border-radius:10px;background:linear-gradient(135deg,#f5f5f5,#eaeaea);border-left:4px solid #555">
+          <div style="font-weight:700;font-size:14px;margin-bottom:4px">💵 Crno</div>
+          <div style="font-size:18px;font-weight:800;font-family:'Cormorant Garamond',serif;color:#555">${eur(revByObrt.crno)}</div>
+        </div>
+      </div>
+
+      <!-- Prihodi stacked bar -->
+      <div class="card">
+        <h2>Struktura prihoda</h2>
+        ${totRev>0?`
+          <div class="pt" style="height:24px;border-radius:8px;margin-bottom:12px">
+            <div class="pf" style="width:${revByObrt.bc/totRev*100}%;background:#c9a87c"></div>
+            <div class="pf" style="width:${revByObrt.fb/totRev*100}%;background:#e85d3a"></div>
+            <div class="pf" style="width:${revByObrt.crno/totRev*100}%;background:#555"></div>
+          </div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:#888">
+            <span><span style="display:inline-block;width:10px;height:10px;background:#c9a87c;border-radius:2px;margin-right:4px"></span>BC ${eur(revByObrt.bc)} (${Math.round(revByObrt.bc/totRev*100)}%)</span>
+            <span><span style="display:inline-block;width:10px;height:10px;background:#e85d3a;border-radius:2px;margin-right:4px"></span>FB ${eur(revByObrt.fb)} (${Math.round(revByObrt.fb/totRev*100)}%)</span>
+            <span><span style="display:inline-block;width:10px;height:10px;background:#555;border-radius:2px;margin-right:4px"></span>Crno ${eur(revByObrt.crno)} (${Math.round(revByObrt.crno/totRev*100)}%)</span>
+          </div>
+        `:`<p style="color:#ccc;font-size:13px">Nema podataka za ovaj mjesec</p>`}
+      </div>
+
+      <!-- Rashodi breakdown -->
+      ${mx.length>0?`
+        <div class="card">
+          <h2>Rashodi po kategorijama</h2>
+          ${XCATS.map(c=>{
+            const v=mx.filter(e=>e.category===c.id).reduce((s,e)=>s+e.amount,0);
+            if(v===0)return"";
+            const pct=totExp>0?(v/totExp*100):0;
+            const bcV=mx.filter(e=>e.category===c.id&&e.obrt==='bc').reduce((s,e)=>s+e.amount,0);
+            const fbV=mx.filter(e=>e.category===c.id&&e.obrt==='fb').reduce((s,e)=>s+e.amount,0);
+            return`<div class="pi">
+              <div class="ph"><span>${c.icon} ${c.label}</span><span class="pv">${eur(v)}</span></div>
+              <div class="pt">
+                ${totExp>0?`<div class="pf" style="width:${bcV/totExp*100}%;background:#c9a87c"></div><div class="pf" style="width:${fbV/totExp*100}%;background:#e85d3a"></div>`:""}
+              </div>
+              <div style="font-size:11px;color:#aaa;margin-top:2px">BC: ${eur(bcV)} · FB: ${eur(fbV)}</div>
+            </div>`;
+          }).join("")}
+        </div>
+      `:""}
+
+      <!-- Plaće breakdown -->
+      ${ms.length>0?`
+        <div class="card">
+          <h2>Plaće — detalji</h2>
+          ${ms.map(s=>{
+            const t=(s.bruto||0)+(s.bonus||0);
+            return`<div class="list-item">
+              <div class="info">
+                <span style="font-weight:600">${s.name}</span>
+                <span class="obrt-tag ${s.obrt}">${s.obrt==='bc'?'BC':'FB'}</span>
+                <span class="amt pink" style="margin-left:8px">${eur(t)}</span>
+                <div style="font-size:11px;color:#aaa;margin-top:2px">Bruto: ${eur(s.bruto||0)} + Bonus: ${eur(s.bonus||0)}</div>
+              </div>
+            </div>`;
+          }).join("")}
+        </div>
+      `:""}
+    </div>
+
+    <div class="footer">Beauty Clinic · Firebody — Financije</div>
+  `;
+
+  if(tab==="revenue"){
+    OBRTS.forEach(o=>{const el=document.getElementById("r-"+o.id);if(el)el.addEventListener("input",calcRevTotal)});
+  }
+}
+
+function sw(t){tab=t;render()}
+function setXO(o){xObrt=o;render()}
+function setXC(c){xCat=c;render()}
+
+function calcRevTotal(){
+  let s=0;
+  OBRTS.forEach(o=>{const el=document.getElementById("r-"+o.id);if(el)s+=parseFloat(el.value)||0});
+  const el=document.getElementById("r-total");if(el)el.textContent=eur(s);
+}
+
+function addRevenue(){
+  const month=document.getElementById("r-month").value;
+  const bc=parseFloat(document.getElementById("r-bc").value)||0;
+  const fb=parseFloat(document.getElementById("r-fb").value)||0;
+  const crno=parseFloat(document.getElementById("r-crno").value)||0;
+  if(bc+fb+crno<=0)return;
+  // Check if month already exists — update it
+  const existing=data.revenue.find(r=>r.month===month);
+  if(existing){
+    existing.bc=bc;existing.fb=fb;existing.crno=crno;
+  } else {
+    data.revenue.push({month,bc,fb,crno,id:Date.now()});
+  }
+  save();toast("Promet spremljen ✓");render();
+}
+
+function addExpense(){
+  const date=document.getElementById("x-date").value;
+  const amount=parseFloat(document.getElementById("x-amt").value)||0;
+  const note=document.getElementById("x-note").value;
+  if(amount<=0)return;
+  data.expenses.push({date,obrt:xObrt,category:xCat,amount,note,id:Date.now()});
+  save();toast("Rashod spremljen ✓");render();
+}
+
+function addSalary(){
+  const month=document.getElementById("s-month").value;
+  const name=document.getElementById("s-name").value.trim();
+  const bruto=parseFloat(document.getElementById("s-bruto").value)||0;
+  const bonus=parseFloat(document.getElementById("s-bonus").value)||0;
+  if(!name||bruto+bonus<=0)return;
+  data.salaries.push({month,obrt:xObrt,name,bruto,bonus,id:Date.now()});
+  save();toast("Plaća spremljena ✓");render();
+}
+
+function del(type,id){data[type]=data[type].filter(x=>x.id!==id);save();render()}
+
+function chMo(d){
+  const[y,m]=selMo.split("-").map(Number);
+  selMo=d<0?(m===1?`${y-1}-12`:`${y}-${String(m-1).padStart(2,"0")}`):(m===12?`${y+1}-01`:`${y}-${String(m+1).padStart(2,"0")}`);
+  render();
+}
+
+load();render();
+</script>
+</body>
+</html>
